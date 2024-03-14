@@ -1,0 +1,86 @@
+---
+title: "green card holders"
+output: html_document
+date: '2023-01-13'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Data and Libraries
+```{r}
+library(ggplot2)
+library(gganimate)
+library(readxl)
+library(hrbrthemes)
+library(gifski)
+library(tidyverse)
+library(ggthemes)
+
+df = read_excel("~/Desktop/Animation/green_card.xlsx")
+
+```
+
+## Font
+```{r}
+
+library(showtext)
+
+## add Roboto font
+font_add_google('Kanit')
+font_add_google('Nunito')
+
+# must be called to indicate that showtext is 
+#going to be automatically invoked to draw text 
+# whenever a plot is created. 
+showtext_auto()
+
+```
+
+
+## Animation
+```{r}
+
+graph1 = df %>%
+  mutate(Year = as.numeric(Year)) %>%
+  ggplot(aes(x = Year, y = Number, group = 1)) +
+  geom_line(size = 1, alpha = 0.75, color = '#F99417') +
+  theme_solarized_2(light = FALSE) +
+  labs(title = "Persons Awarded LPR Status in the United States: 1820 - 2021",
+       y = NULL,
+       caption = 'Source: Department of Homeland Security\n Created by Sammy Cervantes (X: s_crvnts)') +
+  scale_y_continuous(labels = scales::comma) + 
+  theme(
+    text = element_text(colour = "#EEEEEE", family = 'Nunito'),
+    title = element_text(color = "#EEEEEE"),
+    plot.title.position = 'plot',
+    axis.title.x = element_blank(),
+    panel.background = element_rect(fill = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_blank(),
+    legend.key = element_blank(),
+    legend.position = "bottom",
+    plot.title = element_text(hjust = 0.5)
+  )
+
+graph1
+
+```
+```{r}
+graph.animation = graph1 +
+  transition_reveal(Year) + 
+  view_follow(fixed_y = TRUE)
+  
+animate(graph.animation, 
+        height = 500, 
+        width = 800, 
+        fps = 30, 
+        duration = 10,
+        end_pause = 60, 
+        res = 110)
+
+anim_save("green_card.gif", animation = last_animation(), path = "~/Desktop/Animation")
+```
+
